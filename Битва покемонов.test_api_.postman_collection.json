@@ -1,0 +1,580 @@
+{
+	"info": {
+		"_postman_id": "64004b90-6229-47a6-a05f-bf3ad3192209",
+		"name": "Битва покемонов",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40788708"
+	},
+	"item": [
+		{
+			"name": "Создать покемона",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"pokemon_id\", jsonData.id);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{$randomFirstName}}\",\r\n    \"photo_id\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/pokemons",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"pokemons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "поймать",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"pokemon_id\": \"{{pokemon_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/trainers/add_pokeball",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"trainers",
+						"add_pokeball"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "драка",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest(\"https://api.pokemonbattle.ru/v2/pokemons?in_pokeball=1\", function (err, response) {\r",
+							"var jsonData = response.json(); // сохраним весь ответ от бекенда в переменную jsonData\r",
+							"\r",
+							"pm.collectionVariables.set(\"enemy_id\", jsonData.data[3].id);  // сохраним id противника в переменные\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"attacking_pokemon\": \"{{pokemon_id}}\",\r\n    \"defending_pokemon\": \"{{enemy_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/battle",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"battle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/v2/pokemons?in_pokeball=1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"pokemons"
+					],
+					"query": [
+						{
+							"key": "in_pokeball",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "выселить",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"pokemon_id\": \"180007\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/trainers/delete_pokeball",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"trainers",
+						"delete_pokeball"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "нокаут",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/v2/pokemons/knockout",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"pokemons",
+						"knockout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "аватар",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"order_type\": \"avatar\",\r\n    \"details\": {\r\n        \"avatar_id\": \"11\",\r\n        \"card_number\": \"4444 3333 2222 1111\",\r\n        \"card_name\": \"nikita nikita\",\r\n        \"card_actual\": \"10/26\",\r\n        \"card_cvv\": \"125\",\r\n        \"secure_code\": \"56455\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host2}}/payments",
+					"host": [
+						"{{host2}}"
+					],
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "создание без name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 422\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"\": \"{{$randomFirstName}}\",\r\n    \"photo_id\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/pokemons",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"pokemons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://api.pokemonbattle.ru/v2/pokemons?sort=asc_date&page=1&status=1",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json, text/javascript, */*; q=0.01"
+					},
+					{
+						"key": "accept-language",
+						"value": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,bg;q=0.6"
+					},
+					{
+						"key": "origin",
+						"value": "https://pokemonbattle.ru"
+					},
+					{
+						"key": "priority",
+						"value": "u=0, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://pokemonbattle.ru/"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Windows\""
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "empty"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "cors"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-site"
+					},
+					{
+						"key": "trainer_token",
+						"value": "3f93918cd6ba80633c50d5b990779f45"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+					}
+				],
+				"url": {
+					"raw": "https://api.pokemonbattle.ru/v2/pokemons?sort=asc_date&page=1&status=1",
+					"protocol": "https",
+					"host": [
+						"api",
+						"pokemonbattle",
+						"ru"
+					],
+					"path": [
+						"v2",
+						"pokemons"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "asc_date"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "status",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl 'https://api.pokemonbattle.ru/v2/pokemons?sort=asc_date&page=1&status=1' \\\r\n  -H 'accept: application/json, text/javascript, */*; q=0.01' \\\r\n  -H 'accept-language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,bg;q=0.6' \\\r\n  -H 'origin: https://pokemonbattle.ru' \\\r\n  -H 'priority: u=0, i' \\\r\n  -H 'referer: https://pokemonbattle.ru/' \\\r\n  -H 'sec-ch-ua: \"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"' \\\r\n  -H 'sec-ch-ua-mobile: ?0' \\\r\n  -H 'sec-ch-ua-platform: \"Windows\"' \\\r\n  -H 'sec-fetch-dest: empty' \\\r\n  -H 'sec-fetch-mode: cors' \\\r\n  -H 'sec-fetch-site: same-site' \\\r\n  -H 'trainer_token: 3f93918cd6ba80633c50d5b990779f45' \\\r\n  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'"
+			},
+			"response": []
+		},
+		{
+			"name": "{{host}}v2/debug_sentry",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}v2/debug_sentry",
+					"host": [
+						"{{host}}v2"
+					],
+					"path": [
+						"debug_sentry"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{host}}/v2/achievements",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "trainer_token",
+						"value": "3f93918cd6ba80633c50d5b990779f45",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/v2/achievements",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"v2",
+						"achievements"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "100",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{host}}/rating",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/rating",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rating"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "https://api.pokemonbattle.ru",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "3f93918cd6ba80633c50d5b990779f45",
+			"type": "string"
+		},
+		{
+			"key": "pokemon_id",
+			"value": "182026"
+		},
+		{
+			"key": "enemy_id",
+			"value": "179976",
+			"type": "string"
+		},
+		{
+			"key": "host2",
+			"value": "https://lavka.pokemonbattle.ru",
+			"type": "string"
+		}
+	]
+}
